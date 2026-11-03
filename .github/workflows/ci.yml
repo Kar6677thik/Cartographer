@@ -1,0 +1,95 @@
+# Cartographer CI: lint, types, docs and the 8-cell test matrix (spec M0 §6.21, spec 05 §4).
+# Explained line by line in docs/learn/concepts/git-and-github-actions-basics.md.
+#
+# Hardening rules this file follows (milestone C7 will audit it):
+#   - every third-party action is pinned to a full 40-character commit SHA (tag in a comment);
+#     SHAs are looked up with `gh api`, never guessed;
+#   - the automatic token can only read the repository (`permissions: contents: read`);
+#   - checkout doesn't leave credentials behind (`persist-credentials: false`);
+#   - no `pull_request_target`, and no `${{ ... }}` inside `run:` scripts: values reach the
+#     shell only through `env:`.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash # bash exists on windows-latest too, so one syntax works everywhere
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHON: "3.15"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv sync --locked --python "$PYTHON"
+      - run: uv run --python "$PYTHON" python scripts/dev.py lint
+      - run: uv run --python "$PYTHON" python scripts/dev.py format --check
+
+  types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHON: "3.15"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv sync --locked --python "$PYTHON"
+      - run: uv run --python "$PYTHON" python scripts/dev.py types
+
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHON: "3.15"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv sync --locked --python "$PYTHON"
+      - run: uv run --python "$PYTHON" python scripts/dev.py docs
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.13", "3.14", "3.15", "3.15t"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      # Matrix values reach scripts only through env (consistency with the hardening rules,
+      # even though matrix values aren't attacker-controlled).
+      PYTHON: ${{ matrix.python }}
+      HYPOTHESIS_PROFILE: ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv python install "$PYTHON"
+      - run: uv sync --locked --python "$PYTHON"
+      - name: Tests
+        if: ${{ !(matrix.os == 'ubuntu-latest' && matrix.python == '3.15') }}
+        run: uv run --python "$PYTHON" python scripts/dev.py test
+      - name: Tests with coverage gates (one cell only, to avoid duplicate failures)
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python == '3.15' }}
+        run: uv run --python "$PYTHON" python scripts/dev.py test --gates

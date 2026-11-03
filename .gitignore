@@ -1,0 +1,20 @@
+# Anchored to the repo root on purpose: fixture projects contain their own build/ and dist/
+# directories (to test default excludes), and an unanchored "build/" would stop git tracking them.
+/build/
+/dist/
+/.venv/
+/.corpus/
+/.cartographer-cache/
+/benchmarks/generated/
+
+# Python and tool caches (safe to ignore everywhere)
+__pycache__/
+*.py[cod]
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/

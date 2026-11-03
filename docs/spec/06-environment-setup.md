@@ -35,7 +35,7 @@ You should see four entries, with `3.15t` described as *freethreaded*.
 ## Step 3: Git settings for a cross-platform repo
 
 ```powershell
-git config --global core.autocrlf false     # .gitattributes controls line endings instead
+git config core.autocrlf false              # run INSIDE the repo folder: this repo only; .gitattributes controls line endings
 git config --global core.longpaths true     # Windows' 260-character path limit bites in deep fixture trees
 git config --global init.defaultBranch main
 ```

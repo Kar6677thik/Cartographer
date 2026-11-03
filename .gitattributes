@@ -1,0 +1,7 @@
+# Store every text file with LF line endings, on every OS (06 Step 3, D-019).
+* text=auto eol=lf
+*.png binary
+# Fixtures that MUST keep their exact bytes (encodings, BOMs, invalid bytes):
+tests/fixtures/projects/m0_errors/src/demo/bad_encoding.py -text
+tests/fixtures/projects/m0_golden/src/demo/latin.py -text
+tests/fixtures/projects/m0_golden/src/demo/bom.py -text

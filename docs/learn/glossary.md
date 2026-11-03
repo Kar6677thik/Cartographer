@@ -19,6 +19,8 @@
 
 **Artefact poisoning (CI)**: A privileged workflow consuming build artefacts produced by an untrusted run. → `ci-attack-patterns`
 
+**Assertion rewriting (pytest)**: pytest rewrites `assert` statements in test files while importing them, so a failure shows the values involved (`assert 4 == 5`). → `testing-with-pytest`
+
 **Atomic write**: Write to a temporary file, then `os.replace` it over the target, so nobody ever sees a half-written file.
 
 **Attestation (PEP 740)**: A signed statement, published on PyPI next to a file, saying *which CI workflow in which repository built it*. It proves where a file came from, **not** that it's safe (the Ultralytics lesson). → `pypi-and-provenance`
@@ -35,6 +37,8 @@
 
 **Build backend / frontend**: The *frontend* (`uv build`, `pip`) asks the *backend* (`hatchling`, `setuptools`) to turn source into a wheel or sdist. → `packaging-and-build-backends`
 
+**Build matrix (CI)**: Running the same CI job once per combination of settings, for example 2 operating systems × 4 Pythons = 8 jobs. → `git-and-github-actions-basics`
+
 **Byte offset vs. character offset**: `ast` reports columns as *UTF-8 byte* positions. `é` is 2 bytes but 1 character, so the two disagree on non-ASCII lines (D-018). → `text-and-encodings`
 
 **Bytecode**: The low-level instructions CPython compiles your code into before running it. Visible with `dis`. → `how-python-runs-code`
@@ -45,7 +49,11 @@
 
 **CLI (command-line interface)**: A program you drive by typing commands and options in a terminal.
 
+**Code object**: What `compile()` produces: bytecode plus the names, constants and line numbers it needs. Running a module means executing its code object. → `how-python-runs-code`
+
 **Codemod**: A program that rewrites source code automatically (for example, f-string → t-string). → `cst-and-codemods`
+
+**Commit SHA**: The 40-character hexadecimal hash that identifies a git commit. It's computed from the content, so it can't be re-pointed like a tag. → `git-and-github-actions-basics`
 
 **Composite action**: A reusable GitHub Actions step defined in an `action.yml` that bundles several steps. The Ultralytics injection lived in one. → `github-actions-model`
 
@@ -96,6 +104,8 @@
 **Edge (graph)**: A connection from one node to another. In C1, "module A imports module B".
 
 **Edge kind (C1)**: How and when an import runs: `module` (at import time), `optional` (inside `try/except ImportError`), `dynamic` (`importlib.import_module`), `deferred` (inside a function), `typing` (under `TYPE_CHECKING`).
+
+**Editable install**: Installing a project so the environment points at its source folder (`src/`), so edits take effect without reinstalling. `uv sync` does this for the project itself. → `project-layout-and-pyproject`
 
 **Entry point**: A named hook declared in package metadata. *Console scripts* create commands (`cartographer`). *Plugin groups* (`cartographer.rules`) let other packages register extensions. → `entry-points-and-plugins`
 
@@ -253,6 +263,8 @@
 
 **Reverse topological order**: An ordering of a DAG where every edge points *backwards*, so dependencies come before the things that depend on them. → `graphs-and-scc`
 
+**Runner (CI)**: The fresh virtual machine GitHub starts to run one CI job. → `git-and-github-actions-basics`
+
 **SARIF**: Static Analysis Results Interchange Format, a JSON standard for tool findings. GitHub code scanning reads it. → `sarif-and-machine-output`
 
 **SCC (strongly connected component)**: A maximal group of nodes where every node can reach every other. An SCC with more than one module is an import cycle. → `graphs-and-scc`
@@ -281,6 +293,8 @@
 
 **Spike**: A short experiment to verify a fact before depending on it (spec 08).
 
+**Squash merge**: Merging a pull request as one single commit on `main`, however many commits the branch had. → `git-and-github-actions-basics`
+
 **SSTI (server-side template injection)**: Injecting into a template's *source* (for example a Jinja template string), which can run code on the server. → `injection-attacks`
 
 **Static analysis**: Learning about code **without running it**, by reading and parsing it.
@@ -292,6 +306,10 @@
 **Suppression comment**: `# cartographer: ignore[CODE]`, which silences one diagnostic on that line (03 §5). → `tokenize-and-comments`
 
 **Symbol table (`symtable`)**: The compiler's record of which names are local, global or free in each scope.
+
+**`sys.modules`**: The dictionary of every module imported so far. A second `import` of the same module is a lookup here, not a re-run. → `how-python-runs-code`
+
+**`sys.path`**: The list of folders `import` searches, in order. Its first entry depends on how Python was started. → `how-python-runs-code`
 
 **Taint analysis**: Tracking whether dynamic or untrusted data can flow from a source to a sink. → `dataflow-and-taint`
 
