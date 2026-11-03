@@ -1,0 +1,122 @@
+# Cartographer's project file. Every table is explained line by line in
+# docs/learn/concepts/project-layout-and-pyproject.md; the normative content is M0 spec §6.2.
+
+[build-system]
+requires = ["hatchling>=1.27"]          # 1.27+ understands PEP 639 `license = "MIT"`
+build-backend = "hatchling.build"       # D-033
+
+[project]
+name = "cartographer-py"                # D-003: "cartographer" is taken on PyPI
+dynamic = ["version"]                   # read from src/cartographer/__about__.py (D-010)
+description = "Maps unfamiliar Python codebases: imports, startup cost, rules, typing, injection risks, dependency and CI changes."
+readme = "README.md"
+requires-python = ">=3.13"              # D-004
+license = "MIT"                         # D-012
+license-files = ["LICENSE"]
+authors = [{ name = "Kar6677thik" }]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Programming Language :: Python :: Free Threading :: 2 - Beta",
+  "Topic :: Software Development :: Quality Assurance",
+  "Typing :: Typed",
+]
+dependencies = []                       # libcst arrives in C5, PyYAML in C7 (D-006)
+
+[project.scripts]
+cartographer = "cartographer.cli.main:main"      # D-054: main(argv=None) -> int; the wrapper calls sys.exit(main())
+carto = "cartographer.cli.main:main"
+
+[project.urls]
+Repository = "https://github.com/Kar6677thik/Cartographer"
+Documentation = "https://github.com/Kar6677thik/Cartographer/tree/main/docs"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.2",
+  "pytest-cov>=7.1",
+  "hypothesis>=6.170",
+  "ruff>=0.17",
+  "mypy>=2.4",
+  "networkx>=3.7",                      # test oracle only (D-006); never imported from src/
+  "jsonschema>=4.26",                   # SARIF schema validation in tests (D-006)
+]
+
+[tool.hatch.version]
+path = "src/cartographer/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cartographer"]
+
+[tool.cartographer]                     # settings for analysing THIS repo (dogfooding, D-048)
+exclude = ["tests/fixtures/**", ".corpus/**", "benchmarks/generated/**"]   # fixtures contain deliberate errors
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"                # D-005: src/ must stay valid 3.13 syntax
+src = ["src", "tests", "scripts"]
+extend-exclude = ["tests/fixtures"]     # fixtures are DATA, often deliberately broken
+
+[tool.ruff.format]
+# Ruff 0.17 also formats Python code blocks inside Markdown. Our docs align comments by hand
+# for readability (and some blocks are deliberately broken examples), so Markdown is excluded.
+exclude = ["*.md"]
+
+[tool.ruff.per-file-target-version]     # D-055: tests that contain 3.14+/3.15+ syntax
+"tests/**/test_*_py314.py" = "py314"
+"tests/**/test_*_py315.py" = "py315"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "PL", "PT", "D"]
+ignore = [
+  "D105",     # magic-method docstrings: dunder methods are self-explanatory (04 §3.2 exempts them)
+  "D107",     # __init__ docstrings: documented on the class instead
+  "PLR0913",  # too many arguments: dataclass-style constructors legitimately have many
+  "PLC0415",  # import-outside-top-level: deliberate lazy imports keep `--version` fast (05 §2, M0 §6.17)
+]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "PLR2004"]           # tests: docstrings are checked by tests/docs instead; magic numbers are fine
+"scripts/**" = ["T201"]                 # scripts print
+
+[tool.mypy]
+python_version = "3.15"                 # 05 §2: checks the 3.14+-gated modules too.
+                                        # A second pass, `mypy --python-version 3.13 --exclude src/cartographer/adapters/`,
+                                        # checks the 3.13 floor (scripts/dev.py types runs both; CI `types` job too)
+strict = true
+warn_unreachable = true
+files = ["src", "scripts"]
+mypy_path = "src"
+explicit_package_bases = true
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests", "src"]
+addopts = [
+  "-ra", "--strict-markers", "--strict-config",
+  "--import-mode=importlib",
+  "--doctest-modules",
+  "-m", "not network and not docker and not corpus",
+]
+xfail_strict = true
+filterwarnings = ["error"]              # a warning in our code is a bug; whitelist third-party ones explicitly
+markers = [
+  "slow: takes more than 2 s",
+  "network: needs internet (opt in with -m network)",
+  "docker: needs a Docker daemon (opt in with -m docker)",
+  "corpus: needs .corpus/ cloned (opt in with -m corpus)",
+  "execute: runs fixture code in a subprocess",
+  "requires_py314: skipped on Python < 3.14",
+  "requires_py315: skipped on Python < 3.15",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["cartographer"]
+[tool.coverage.report]
+show_missing = true
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "@overload"]

@@ -277,7 +277,11 @@ ignore = [
   "D105",     # magic-method docstrings: dunder methods are self-explanatory (04 §3.2 exempts them)
   "D107",     # __init__ docstrings: documented on the class instead
   "PLR0913",  # too many arguments: dataclass-style constructors legitimately have many
+  "PLC0415",  # import-outside-top-level: deliberate lazy imports (§6.17 import discipline); added in phase 1
 ]
+# Added in phase 1: ruff >= 0.17 also formats Python blocks inside Markdown; our docs align
+# comments by hand and contain deliberately broken examples, so Markdown is excluded:
+# [tool.ruff.format] exclude = ["*.md"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 [tool.ruff.lint.per-file-ignores]
@@ -724,7 +728,7 @@ def enable_windows_vt() -> bool
 ### 6.19 Tests infrastructure (`tests/conftest.py`)
 - Registers Hypothesis profiles `dev` (100 examples), `ci` (500, `deadline=None`, `print_blob=True`) and `thorough` (5,000), and loads `os.environ.get("HYPOTHESIS_PROFILE", "dev")`.
 - `collect_ignore_glob = ["fixtures/*"]`, so pytest never imports fixture code (05 §3.5). On interpreters older than 3.14 / 3.15 it also adds `**/test_*_py314.py` / `**/test_*_py315.py` (05 §3.1), because those files wouldn't even parse.
-- **`src/conftest.py`** (D-055): `collect_ignore_glob` for `cartographer/adapters/*` when `sys.version_info < (3, 14)` and for `cartographer/depdiff/sandbox/*` always. Its docstring explains why doctest collection imports modules.
+- **`src/conftest.py`** (D-055): `collect_ignore` for `cartographer/__main__.py` always (importing it runs the CLI), `collect_ignore_glob` for `cartographer/adapters/*` when `sys.version_info < (3, 14)` and for `cartographer/depdiff/sandbox/*` always. Its docstring explains why doctest collection imports modules.
 - `pytest_collection_modifyitems`: skip `requires_py314`/`requires_py315` on older interpreters, with the reason `needs Python 3.15 (running 3.13)`.
 - `pytest_addoption`: `--update-golden`.
 - **`golden` fixture:** `golden.check(actual: str, path: str)`. It normalises both sides and compares; on mismatch it fails with a unified diff (`difflib.unified_diff`). With `--update-golden` it writes the file instead and marks the test as `xfail("golden updated")`, so an update run is never mistaken for a pass. Normalisations, in order:

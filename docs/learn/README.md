@@ -32,9 +32,9 @@ The slug is the file name: `concepts/<slug>.md`. **Owner** is the milestone that
 ### Stage 0: Foundations (M0)
 | ✓ | Slug | Topic | What you'll be able to explain |
 |---|---|---|---|
-| ☐ | `how-python-runs-code` | Interpreter, bytecode, modules, scripts vs. `-m` | What actually happens when you type `python file.py` |
-| ☐ | `project-layout-and-pyproject` | Packages vs. modules, `src/` layout, `pyproject.toml`, entry points (intro) | Why our repo is shaped the way it is |
-| ☐ | `virtual-environments-and-uv` | venvs, `site-packages`, lockfiles, `uv sync/run/python` | Where installed packages live and why projects isolate them |
+| ✅ | [`how-python-runs-code`](concepts/how-python-runs-code.md) | Interpreter, bytecode, modules, scripts vs. `-m` | What actually happens when you type `python file.py` |
+| ✅ | [`project-layout-and-pyproject`](concepts/project-layout-and-pyproject.md) | Packages vs. modules, `src/` layout, `pyproject.toml`, entry points (intro) | Why our repo is shaped the way it is |
+| ✅ | [`virtual-environments-and-uv`](concepts/virtual-environments-and-uv.md) | venvs, `site-packages`, lockfiles, `uv sync/run/python` | Where installed packages live and why projects isolate them |
 | ☐ | `type-hints-basics` | Annotations, `X \| None`, generics in brief, `mypy` | How to read every signature in this codebase |
 | ☐ | `dataclasses-and-enums` | `@dataclass(frozen, slots)`, `IntEnum`, immutability, hashing | Why our core types are frozen dataclasses |
 | ☐ | `exceptions` | Raising, catching, hierarchies, `raise … from …`, exit codes | How errors flow from analyzers to the CLI |
@@ -46,9 +46,9 @@ The slug is the file name: `concepts/<slug>.md`. **Owner** is the milestone that
 | ☐ | `ast-basics` | Source → tokens → AST; `ast.parse`, nodes, fields, positions, `NodeVisitor` | **The foundation of every milestone** |
 | ☐ | `tokenize-and-comments` | The tokenizer, why comments aren't in the AST, finding comments safely | How suppression comments are found |
 | ☐ | `descriptors-and-cached-property` | Attribute lookup, descriptors, `property`, `cached_property` | How `SourceFile.tree` parses only once |
-| ☐ | `testing-with-pytest` | Tests, fixtures, markers, parametrize, coverage, golden files | How to read and run our tests |
+| ✅ | [`testing-with-pytest`](concepts/testing-with-pytest.md) | Tests, fixtures, markers, parametrize, coverage, golden files | How to read and run our tests |
 | ☐ | `property-based-testing` | Hypothesis strategies, shrinking, oracles, invariants | How we prove hand-built algorithms correct |
-| ☐ | `git-and-github-actions-basics` | Commits, branches, PRs, what a CI workflow is | What happens when you push |
+| ✅ | [`git-and-github-actions-basics`](concepts/git-and-github-actions-basics.md) | Commits, branches, PRs, what a CI workflow is | What happens when you push |
 | ☐ | `sarif-and-machine-output` | JSON schemas, SARIF, why tools emit machine formats | How GitHub shows our findings inline |
 
 ### Stage 1: The import system (C1)
