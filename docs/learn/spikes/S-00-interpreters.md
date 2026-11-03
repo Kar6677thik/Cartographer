@@ -45,13 +45,13 @@ Installed 4 versions in 5.27s
 
 All 45 phase-1 tests passed on each of the four interpreters locally.
 
-CI: recorded below once the first run of the phase-1 PR finishes.
+CI: all 8 test cells installed their interpreter with `uv python install` and passed (first run of PR #1, commit `93943d3`). Details under "CI result".
 
 ## Conclusion
 
 **Locally: yes.** uv provides all four builds on Windows with no admin rights. They live under `%APPDATA%\uv\python\` and don't touch the pre-existing Python 3.12.
 
-**CI:** see "CI result" below.
+**CI: yes.** `astral-sh/setup-uv` v10.3.3 plus `uv python install` provides all four builds, including `3.15t`, on both `windows-latest` and `ubuntu-latest`. The fallback in spec 08 (drop 3.15t on Windows) isn't needed.
 
 ## Spec changes made
 
@@ -60,7 +60,23 @@ CI: recorded below once the first run of the phase-1 PR finishes.
 
 ## CI result
 
-_Pending: filled in from the first CI run of the `m0/skeleton` PR._
+First run of PR #1 (`m0/skeleton`, commit `93943d3`, 2026-11-03): **11 of 11 jobs passed.**
+
+| Job | Interpreter installed | Duration |
+|---|---|---|
+| test (ubuntu-latest, 3.13) | 3.13.18 | 13 s |
+| test (ubuntu-latest, 3.14) | 3.14.10 | 15 s |
+| test (ubuntu-latest, 3.15) + coverage gates | 3.15.2 | 12 s |
+| test (ubuntu-latest, 3.15t) | 3.15.2 free-threaded | 13 s |
+| test (windows-latest, 3.13) | 3.13.18 | 26 s |
+| test (windows-latest, 3.14) | 3.14.10 | 31 s |
+| test (windows-latest, 3.15) | 3.15.2 | 28 s |
+| test (windows-latest, 3.15t) | 3.15.2 free-threaded | 38 s |
+| lint / types / docs | 3.15.2 | 12 s / 12 s / 15 s |
+
+Each interpreter download took under 4 s. Windows cells run about twice as long as Linux ones.
+
+**One local mismatch:** CI got **3.13.18**, but the owner's machine has **3.13.5**. uv found an older 3.13 already in its cache and reused it instead of downloading the newest patch release. Patch releases contain bug fixes, so to match CI, run `uv python upgrade 3.13` (or `uv python install --reinstall 3.13`). The lesson: "3.13" names a *series*, not one exact interpreter.
 
 ## What this taught us
 
